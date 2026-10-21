@@ -21,7 +21,7 @@
  *     1. `<source media="(prefers-reduced-motion: no-preference)">`
  *        資源選択の段階で候補が0本になり、**1バイトも取りに行かない**
  *        （Chromium で実測: webm も mp4 も要求が飛ばない）。
- *     2. `.site-video-motion { display: none }`（samples.css）
+ *     2. `.site-video-motion { display: none }`（site.css）
  *        `media` 属性を無視する実装が仮にあっても、動くものが出ない。
  *   どちらの経路でも**静止画は出る**ようにするため、ポスターは
  *   `poster` 属性と器の `background-image` の**両方**に置いてある

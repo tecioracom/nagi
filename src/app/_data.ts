@@ -45,7 +45,7 @@ export type RoomType = {
   /** 部屋番号。並びが客室カレンダーの行順になる。 */
   rooms: readonly string[];
   lead: string;
-  /** トップの客室カードの地（samples.css の .nagi-room-N）。写真の下に残る。 */
+  /** トップの客室カードの地（site.css の .nagi-room-N）。写真の下に残る。 */
   tone: string;
   /** 客室の写真（public/samples/ からの拡張子なしの道）。 */
   photo: string;

@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
  *   面をカードに割り、濃い色のサイドバーで縦の位置を固定する。
  *
  * ■ サイドバーは sticky。**祖先に overflow / transform を付けないこと。**
- *   この器の外側（layout.tsx / samples.css の .sample-shell）にも付けない。
+ *   この器の外側（layout.tsx / site.css の .sample-shell）にも付けない。
  *   1つ入るだけで無言で効かなくなる。検査 [11] が見ている。
  *
  * ■ 色はサイトの CSS 変数から取る

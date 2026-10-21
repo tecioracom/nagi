@@ -1,0 +1,83 @@
+# ============================================================================
+# main に push したら Vercel へ本番デプロイし、**GitHub にデプロイ記録を残す**。
+#
+# ■ なぜ Actions 経由か
+#   Vercel の GitHub 連携は使えない。Vercel 側の GitHub は別アカウント
+#   (yt6251-dev) に紐づいていて、この repository が見えないため。
+#   Actions から CLI で出せば連携は要らず、`environment:` を書くことで
+#   GitHub が Deployments の記録を自動で作る。
+#
+# ■ 必要な秘密情報は VERCEL_TOKEN の1つだけ
+#   組織 ID と プロジェクト ID は秘密ではない（Vercel の画面に出ている識別子）
+#   ので、下に直接書いてある。トークンだけ Settings > Secrets に置く。
+#
+# ■ トークンが無いうちは走らせない
+#   無い状態で動かすと毎回赤くなり、本当の失敗が埋もれる。
+#   `secrets` は if: で直接読めないので、一度 job の出力に移してから見る。
+# ============================================================================
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: team_llTirbyFaxLBzrsbXAOnbSXw
+  VERCEL_PROJECT_ID: prj_sBGsWSKNhRDQM020MBAdz93aLatC
+
+jobs:
+  guard:
+    name: トークンの有無を見る
+    runs-on: ubuntu-24.04
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        run: |
+          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_TOKEN が未設定なのでデプロイを飛ばします。" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  deploy:
+    name: Vercel へ本番デプロイ
+    needs: guard
+    if: needs.guard.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # この environment の指定で、GitHub が Deployments の記録を作る
+    environment:
+      name: production
+      url: https://nagi.sample.teciora.com
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vercel CLI
+        run: npm install --global vercel@65
+
+      - name: 設定を取り込む
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: ビルド
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: 配信
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")
+          echo "$url"
+          echo "- 配信: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 公開: https://nagi.sample.teciora.com" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 守ると決めたことを確かめる
+        run: bash scripts/check.sh

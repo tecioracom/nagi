@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --focus-ring: #00D1FF;
+  }
+  /* 可視フォーカス（全インタラクティブ要素） */
+  :where(a, button, summary, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  body {
+    @apply font-sans text-body bg-primary;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+/* ダーク面 / ライト面のテキストユーティリティ */
+@layer components {
+  .surface-dark  { @apply bg-primary text-white/90; }
+  .surface-light { @apply bg-muted text-neutral-700; }
+  .text-strong-dark  { @apply text-white; }
+  .text-strong-light { @apply text-primary; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
